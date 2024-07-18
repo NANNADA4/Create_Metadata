@@ -22,6 +22,8 @@ jobs:
         pip install openpyxl
         pip install natsort
         pip install pandas
+        pip install PyQt6-Qt6
+        pip install PyQt6-sip
     - name: Analysing the code with pylint
       run: |
         pylint $(git ls-files '*.pyw')
