@@ -153,8 +153,7 @@ class FileListGenerator(QWidget):
                 elif os.path.exists(add_extension_filename):
                     wb = load_workbook(add_extension_filename)
             except Exception as e:
-                QMessageBox.warning(self, '엑셀 파일 읽기 오류', f'{
-                                    e} 엑셀 파일 확장자 오류. 다른 파일을 선택하세요')
+                QMessageBox.warning(self, '엑셀 파일 읽기 오류', f'{e} 엑셀 파일 확장자 오류')
                 return
             ws = wb.active
 
