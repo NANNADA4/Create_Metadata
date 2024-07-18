@@ -247,8 +247,7 @@ class FileListGenerator(QWidget):
             return 2
         if matches_require:
             return 3
-        else:
-            return 4
+        return 4
 
 
 if __name__ == '__main__':
