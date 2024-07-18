@@ -54,7 +54,7 @@ class FileListGenerator(QWidget):
             self.generate_button.setEnabled(True)
 
     def initUI(self):
-        self.setWindowTitle('파일 리스트 생성기')
+        self.setWindowTitle('국정감사 메타데이터 생성기')
         self.resize(300, 200)
 
         layout = QVBoxLayout()
