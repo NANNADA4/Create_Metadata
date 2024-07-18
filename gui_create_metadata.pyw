@@ -228,8 +228,7 @@ class FileListGenerator(QWidget):
             wb.save(add_extension_filename)
 
         # 완료 메시지 출력
-        QMessageBox.information(self, '완료', f'파일 정보가 {
-                                self.output_file}에 저장되었습니다.')
+        QMessageBox.information(self, '완료', f'{self.output_file}에 저장되었습니다.')
 
     def search_in_row(self, row):
         pattern_attach = '|'.join(
