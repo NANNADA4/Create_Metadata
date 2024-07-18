@@ -14,7 +14,7 @@ import pandas as pd
 class FileListGenerator(QWidget):
     def __init__(self):
         super().__init__()
-        self.initUI()
+        self.init_ui()
         self.root_folder = ''
         self.output_file = ''
         self.organizations = ['과학기술사업화진흥원', '한국항공우주연구원', '국가안보실', '국가인권위원회', '국회도서관', '국회미래연구원', '국회사무처', '국회예산정책처', '국회입법조사처', '대통령경호처', '대통령비서실', '감사원', '고위공직자범죄수사처', '광주고등검찰청', '광주지방검찰청', '군사법원', '대검찰청', '대구고등검찰청', '대구지방검찰청', '대법원', '대전고등검찰청', '대전지방검찰청', '법무부', '법제처', '부산고등검찰청', '국가녹색기술연구소', '부산지방검찰청', '서울고등검찰청', '수원고등검찰청', '수원지방검찰청', '울산지방검찰청', '전주지방검찰청', '제주지방검찰청', '창원지방검찰청', '청주지방검찰청', '헌법재판소', '88관광개발주식회사', '개인정보보호위원회', '경제ㆍ인문사회연구회', '공정거래위원회', '국가보훈처', '국무조정실국무총리비서실', '국민권익위원회', '금융감독원', '금융위원회', '독립기념관', '서민금융진흥원', '신용보증기금', '예금보험공사', '중소기업은행', '한국공정거래조정원', '한국보훈복지의료공단', '한국산업은행', '한국소비자원', '한국자산관리공사', '한국주택금융공사', '관세청', '광주본부세관', '광주지방국세청', '국세청', '국제원산지정보원', '기획재정부', '대구본부세관', '대구지방국세청', '대전지방국세청', '부산본부세관', '부산지방국세청', '서울지방국세청', '인천지방국세청', '조달청', '중부지방국세청', '통계청', '한국수출입은행', '한국은행', '한국재정정보원', '한국조폐공사', '한국투자공사', '강릉원주대학교치과병원', '강원대학교', '강원대학교병원', '강원도교육청', '경기도교육청', '경북대학교', '경북대학교병원', '경북대학교치과병원', '경상국립대학교', '경상국립대학교병원', '경상남도교육청', '경상북도교육청', '광주광역시교육청', '교원소청심사위원회', '교육부', '국가교육위원회', '국가평생교육진흥원', '국립국제교육원', '국립특수교육원', '국사편찬위원회', '대구광역시교육청', '대전광역시교육청', '대한민국학술원사무국', '동북아역사재단', '부산광역시교육청', '부산대학교', '부산대학교병원', '부산대학교치과병원', '사립학교교직원연금공단', '서울과학기술대학교', '서울교육대학교', '서울대학교', '서울대학교병원', '서울대학교치과병원', '서울특별시교육청', '세종특별자치시교육청', '울산광역시교육청', '인천광역시교육청', '인천대학교', '전남대학교', '전남대학교병원', '전라남도교육청', '전라북도교육청', '전북대학교', '전북대학교병원', '제주대학교', '제주대학교병원', '제주특별자치도교육청', '중앙교육연수원', '충남대학교', '충남대학교병원', '충북대학교', '충북대학교병원', '충청남도교육청', '충청북도교육청', '한국고전번역원', '한국교원대학교', '한국교육시설안전원', '한국교육학술정보원', '한국교직원공제회', '한국대학교육협의회', '한국방송통신대학교', '한국사학진흥재단', '한국연구재단', '한국장학재단', '한국전문대학교육협의회', '한국학중앙연구원', '고등과학원', '과학기술연합대학원대학교', '과학기술인공제회', '과학기술일자리진흥원', '과학기술정보통신부', '광주과학기술원', '국가과학기술연구회', '국가과학기술인력개발원', '국가보안기술연구소', '국가수리과학연구소', '국립과천과학관', '국립광주과학관', '국립대구과학관', '국립부산과학관', '국립전파연구원', '국립중앙과학관', '기초과학연구원', '나노종합기술원', '녹색기술센터', '대구경북과학기술원', '방송문화진흥회', '방송통신심의위원회', '방송통신위원회', '별정우체국연금관리단', '세계김치연구소', '시청자미디어재단', '안전성평가연구소', '연구개발특구진흥재단', '우정사업본부', '우체국금융개발원', '우체국물류지원단', '우체국시설관리단', '울산과학기술원', '원자력안전위원회', '정보통신기획평가원', '정보통신산업진흥원', '중앙전파관리소', '한국건설기술연구원', '한국과학기술기획평가원', '한국과학기술단체총연합회', '한국과학기술연구원', '한국과학기술원', '한국과학기술정보연구원', '한국과학기술한림원', '한국과학영재학교', '한국과학창의재단', '한국교육방송공사', '한국기계연구원', '한국기초과학지원연구원', '한국나노기술원', '한국뇌연구원', '한국데이터산업진흥원', '한국방송공사', '한국방송광고진흥공사', '한국방송통신전파진흥원', '한국생명공학연구원', '한국생명기술연구원', '한국수력원자력', '한국식품연구원', '한국에너지기술연구원', '한국여성과학기술인육성재단', '한국연구재단', '한국우편사업진흥원', '한국원자력안전기술원', '한국원자력안전재단', '한국원자력연구원', '한국원자력의학원', '한국원자력통제기술원', '한국인터넷진흥원', '한국재료연구원', '한국전기연구원', '한국전자통신연구원', '한국지능정보사회진흥원', '한국지질자원연구원', '한국천문연구원', '한국철도기술연구원', '한국표준과학연구원', '한국한의학연구원', '한국공항우주연구원', '한국핵융합에너지연구원', '한국화학연구원', '남북교류협력지원협회', '민주평화통일자문회의', '북한이탈주민지원재단', '외교부', '재외동포재단', '통일부', '한ㆍ아프리카재단', '한국국제교류재단', '한국국제협력단', '5ㆍ18민주화운동진상규명조사위원회', '공군본부', '국방부', '방위사업청', '병무청', '육군본부', '지상군구성군사령부', '지방작전사령부', '합동참모본부', '해군본부', 'MG새마을금고중앙회', '경기남부경찰청', '경기도', '경기북부경찰청', '경상남도', '경상남도경찰청', '경상북도', '경상북도경찰청', '경찰공제회', '경찰청', '공무원연금공단', '광주광역시', '광주광역시경찰청', '대전광역시', '대전광역시경찰청', '대한소방공제회', '대한지방행정공제회', '도로교통공단', '민주화운동기념사업회', '바르게살기운동중앙협의회', '새마을운동중앙회', '서울경찰청', '서울특별시', '세종경찰청', '세종특별자치시', '소방산업공제조합', '소방청', '울산경찰청', '울산광역시', '인사혁신처', '일제강제동원피해자지원재단', '제주특별자치도', '제주특별자치도경찰청', '중앙선거관리위원회', '지방공기업평가원', '진실ㆍ화해를위한과거사정리위원회', '충청북도', '충청북도경찰청', '특수법인총포화약안전기술협회', '한국섬진흥원', '한국소방산업기술원', '한국소방시설협회', '한국소방안전원', '한국승강기안전공단', '한국자유총연맹', '한국지능정보사회진흥원', '한국지방세연구원', '한국지방재정공제회', '한국지방행정연구원', '한국지역정보개발원', '행정안전부',
@@ -53,7 +53,7 @@ class FileListGenerator(QWidget):
         if self.root_folder and self.output_file:
             self.generate_button.setEnabled(True)
 
-    def initUI(self):
+    def init_ui(self):
         self.setWindowTitle('국정감사 메타데이터 생성기')
         self.resize(300, 200)
 
@@ -89,22 +89,19 @@ class FileListGenerator(QWidget):
         self.setLayout(layout)
 
     def generate_file_list(self):
-        parent_folder = self.root_folder
-        output_file = self.output_file
-
-        if not os.path.isdir(parent_folder):
+        if not os.path.isdir(self.root_folder):
             QMessageBox.warning(self, '경로 오류', '유효하지 않은 폴더 경로입니다.')
             return
 
         # 최상위 폴더명 가져오기
-        top_level_folder = os.path.basename(parent_folder)
-        grandparent_folder = os.path.dirname(parent_folder)
+        top_level_folder = os.path.basename(self.root_folder)
+        grandparent_folder = os.path.dirname(self.root_folder)
 
         # 파일 리스트 초기화
         file_list = []
 
         # parent_folder를 기준으로 모든 파일을 탐색
-        for root, _, files in os.walk(parent_folder):
+        for root, _, files in os.walk(self.root_folder):
             # 파일을 자연 정렬하여 순회
             for file in natsorted(files):
                 file_path = os.path.join(root, file)  # 파일 경로 생성
@@ -126,11 +123,11 @@ class FileListGenerator(QWidget):
         df = pd.DataFrame(file_list)
 
         # 출력 파일이 존재하지 않는 경우 새로운 워크북 생성
-        add_extension_filename = output_file + '.xlsx'
+        add_extension_filename = self.output_file + '.xlsx'
 
-        if not os.path.exists(output_file) and not os.path.exists(add_extension_filename):
-            if not output_file.endswith('.xlsx'):
-                output_file = add_extension_filename
+        if not os.path.exists(self.output_file) and not os.path.exists(add_extension_filename):
+            if not self.output_file.endswith('.xlsx'):
+                self.output_file = add_extension_filename
             wb = Workbook()
             ws = wb.active
 
@@ -148,8 +145,8 @@ class FileListGenerator(QWidget):
         else:
             # 기존 파일 불러오기
             try:
-                if os.path.exists(output_file):
-                    wb = load_workbook(output_file)
+                if os.path.exists(self.output_file):
+                    wb = load_workbook(self.output_file)
                 elif os.path.exists(add_extension_filename):
                     wb = load_workbook(add_extension_filename)
             except Exception as e:
@@ -225,13 +222,14 @@ class FileListGenerator(QWidget):
                     ws.cell(row=last_row + index + 1, column=11, value='기타')
 
         # 변경 사항 저장
-        if os.path.exists(output_file) or output_file.endswith('.xlsx'):
-            wb.save(output_file)
+        if os.path.exists(self.output_file) or self.output_file.endswith('.xlsx'):
+            wb.save(self.output_file)
         else:
             wb.save(add_extension_filename)
 
         # 완료 메시지 출력
-        QMessageBox.information(self, '완료', f'파일 정보가 {output_file}에 저장되었습니다.')
+        QMessageBox.information(self, '완료', f'파일 정보가 {
+                                self.output_file}에 저장되었습니다.')
 
     def search_in_row(self, row):
         pattern_attach = '|'.join(
@@ -246,9 +244,9 @@ class FileListGenerator(QWidget):
 
         if matches_attach:
             return 1
-        elif matches_answer:
+        if matches_answer:
             return 2
-        elif matches_require:
+        if matches_require:
             return 3
         else:
             return 4
