@@ -9,6 +9,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill
 from natsort import natsorted
 import pandas as pd
+import shutil
 
 
 class FileListGenerator(QWidget):
@@ -81,18 +82,73 @@ class FileListGenerator(QWidget):
         layout.addWidget(self.separator)
 
         self.generate_button = QPushButton('엑셀 생성')
-        self.generate_button.clicked.connect(self.generate_file_list)
+        self.generate_button.clicked.connect(self.generate_metadata)
         self.generate_button.setDefault(True)
         self.generate_button.setEnabled(False)
         layout.addWidget(self.generate_button)
 
+        self.separator2 = QFrame()
+        self.separator2.setFrameShape(QFrame.Shape.HLine)
+        self.separator2.setFrameShadow(QFrame.Shadow.Sunken)
+        layout.addWidget(self.separator2)
+
+        self.move_file_button = QPushButton('파일 분류 및 이동')
+        # self.
+
         self.setLayout(layout)
 
-    def generate_file_list(self):
+    def generate_metadata(self):
         if not os.path.isdir(self.root_folder):
             QMessageBox.warning(self, '경로 오류', '유효하지 않은 폴더 경로입니다.')
             return
 
+        df = self.dir_to_dic()
+        # 출력 파일이 존재하지 않는 경우 새로운 워크북 생성
+        add_extension_filename = self.output_file + '.xlsx'
+
+        if not os.path.exists(self.output_file) and not os.path.exists(add_extension_filename):
+            if not self.output_file.endswith('.xlsx'):
+                self.output_file = add_extension_filename
+            wb = Workbook()
+            ws = wb.active
+
+            # 헤더 추가
+            headers = ['위원회', '피감기관', 'BOOK_ID', 'SEQNO', 'FILE_NAME',
+                       '국정감사 파일명', '위원', '질의', 'REALFILE_NAME', '실제 경로', '문서 종류']
+            for col_idx, header in enumerate(headers, start=1):
+                ws.cell(row=1, column=col_idx, value=header)
+
+            # 첫 번째 행의 셀 색상 설정
+            fill_color = PatternFill(start_color='4f81bd',
+                                     end_color='4f81bd', fill_type='solid')
+            for col in range(1, 12):
+                ws.cell(row=1, column=col).fill = fill_color
+        else:
+            # 기존 파일 불러오기
+            try:
+                if os.path.exists(self.output_file):
+                    wb = load_workbook(self.output_file)
+                elif os.path.exists(add_extension_filename):
+                    wb = load_workbook(add_extension_filename)
+            except Exception as e:
+                QMessageBox.warning(self, '엑셀 파일 읽기 오류', f'{e} 엑셀 파일 확장자 오류')
+                return
+            ws = wb.active
+
+        # 마지막 행 인덱스 확인
+        last_row = ws.max_row
+        self.write_to_excel(df, last_row, ws)
+
+        # 변경 사항 저장
+        if os.path.exists(self.output_file) or self.output_file.endswith('.xlsx'):
+            wb.save(self.output_file)
+        else:
+            wb.save(add_extension_filename)
+
+        # 완료 메시지 출력
+        QMessageBox.information(self, '완료', f'{self.output_file}에 저장되었습니다.')
+
+    def dir_to_dic(self):
         # 최상위 폴더명 가져오기
         top_level_folder = os.path.basename(self.root_folder)
         grandparent_folder = os.path.dirname(self.root_folder)
@@ -129,43 +185,9 @@ class FileListGenerator(QWidget):
                 })
 
         # DataFrame 생성
-        df = pd.DataFrame(file_list)
+        return pd.DataFrame(file_list)
 
-        # 출력 파일이 존재하지 않는 경우 새로운 워크북 생성
-        add_extension_filename = self.output_file + '.xlsx'
-
-        if not os.path.exists(self.output_file) and not os.path.exists(add_extension_filename):
-            if not self.output_file.endswith('.xlsx'):
-                self.output_file = add_extension_filename
-            wb = Workbook()
-            ws = wb.active
-
-            # 헤더 추가
-            headers = ['위원회', '피감기관', 'BOOK_ID', 'SEQNO', 'FILE_NAME',
-                       '국정감사 파일명', '위원', '질의', 'REALFILE_NAME', '실제 경로', '문서 종류']
-            for col_idx, header in enumerate(headers, start=1):
-                ws.cell(row=1, column=col_idx, value=header)
-
-            # 첫 번째 행의 셀 색상 설정
-            fill_color = PatternFill(start_color='4f81bd',
-                                     end_color='4f81bd', fill_type='solid')
-            for col in range(1, 12):
-                ws.cell(row=1, column=col).fill = fill_color
-        else:
-            # 기존 파일 불러오기
-            try:
-                if os.path.exists(self.output_file):
-                    wb = load_workbook(self.output_file)
-                elif os.path.exists(add_extension_filename):
-                    wb = load_workbook(add_extension_filename)
-            except Exception as e:
-                QMessageBox.warning(self, '엑셀 파일 읽기 오류', f'{e} 엑셀 파일 확장자 오류')
-                return
-            ws = wb.active
-
-        # 마지막 행 인덱스 확인
-        last_row = ws.max_row
-
+    def write_to_excel(self, df, last_row, ws):
         # DataFrame의 각 행을 엑셀에 추가
         for index, row in df.iterrows():
             blank = str(row['위원회']).find(' ')
@@ -226,15 +248,6 @@ class FileListGenerator(QWidget):
                         column=11, value='국정감사 요구자료')
             else:
                 ws.cell(row=last_row + index + 1, column=11, value='기타')
-
-        # 변경 사항 저장
-        if os.path.exists(self.output_file) or self.output_file.endswith('.xlsx'):
-            wb.save(self.output_file)
-        else:
-            wb.save(add_extension_filename)
-
-        # 완료 메시지 출력
-        QMessageBox.information(self, '완료', f'{self.output_file}에 저장되었습니다.')
 
     def search_in_row(self, row):
         pattern_attach = '|'.join(
