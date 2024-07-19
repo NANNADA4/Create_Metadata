@@ -184,15 +184,6 @@ class FileListGenerator(QWidget):
 
         QMessageBox.information(self, '완료', f'{self.output_folder}에 저장되었습니다.')
 
-    def check_folder_excel(self):
-        if not os.path.isdir(self.root_folder):
-            QMessageBox.warning(self, '경로 오류', '유효하지 않은 폴더 경로입니다.')
-            return
-        add_extension_filename = self.output_excel + '.xlsx'
-
-        if not os.path.exists(self.output_excel) and not os.path.exists(add_extension_filename):
-            return False
-
     def generate_metadata(self):
         is_excel_exist = self.check_folder_excel()
 
@@ -242,66 +233,14 @@ class FileListGenerator(QWidget):
         # 완료 메시지 출력
         QMessageBox.information(self, '완료', f'{self.output_excel}에 저장되었습니다.')
 
-    def processing_search_in_row(self, row):
-        depth2_result = 4
+    def check_folder_excel(self):
+        if not os.path.isdir(self.root_folder):
+            QMessageBox.warning(self, '경로 오류', '유효하지 않은 폴더 경로입니다.')
+            return
+        add_extension_filename = self.output_excel + '.xlsx'
 
-        primary_search_in_row = self.primary_search_in_row(row['전체 경로'])
-        if primary_search_in_row == 4:
-            if row['2단계 서브 폴더'] is not None:
-                depth2_result = self.search_in_row(row['2단계 서브 폴더'])
-                path_result = self.search_in_row(row['파일명 제외 경로'])
-            else:
-                path_result = self.search_in_row(row['파일명 제외 경로'])
-            if depth2_result == 4:
-                if path_result == 4:
-                    result_filetype = self.search_in_row(row['실제 경로'])
-                else:
-                    result_filetype = path_result
-            else:
-                result_filetype = depth2_result
-        else:
-            result_filetype = primary_search_in_row
-        return result_filetype
-
-    def dir_to_dic(self):
-        # 최상위 폴더명 가져오기
-        top_level_folder = os.path.basename(self.root_folder)
-        grandparent_folder = os.path.dirname(self.root_folder)
-
-        # 파일 리스트 초기화
-        file_list = []
-
-        # parent_folder를 기준으로 모든 파일을 탐색
-        for root, _, files in os.walk(self.root_folder):
-            # 파일을 자연 정렬하여 순회
-            for file in natsorted(files):
-                file_path = os.path.join(root, file)  # 파일 경로 생성
-
-                # 파일의 부모 폴더명 가져오기
-                relative_path = os.path.relpath(file_path, grandparent_folder)
-                path_components = relative_path.split(os.sep)
-                if (len(path_components) > 2):
-                    two_depth_path = os.path.join(
-                        path_components[0], path_components[1])
-                else:
-                    two_depth_path = None
-                relative_except_filename_path = os.path.dirname(relative_path)
-                first_folder_name = relative_path.split(
-                    os.sep)[1]  # 첫 번째 서브폴더명 가져오기
-
-                # 파일 정보를 딕셔너리로 추가
-                file_list.append({
-                    '위원회': top_level_folder,
-                    '피감기관': first_folder_name,
-                    'FILE_NAME': file,  # 파일명
-                    '실제 경로': relative_path,  # 실제 경로
-                    '파일명 제외 경로': relative_except_filename_path,  # 파일명 제외 경로이름
-                    '2단계 서브 폴더': two_depth_path,
-                    '전체 경로': file_path
-                })
-
-        # DataFrame 생성
-        return pd.DataFrame(file_list)
+        if not os.path.exists(self.output_excel) and not os.path.exists(add_extension_filename):
+            return False
 
     def write_to_excel(self, df, last_row, ws):
         # DataFrame의 각 행을 엑셀에 추가
@@ -359,6 +298,67 @@ class FileListGenerator(QWidget):
                         column=11, value='국정감사 요구자료')
             else:
                 ws.cell(row=last_row + index + 1, column=11, value='기타')
+
+    def dir_to_dic(self):
+        # 최상위 폴더명 가져오기
+        top_level_folder = os.path.basename(self.root_folder)
+        grandparent_folder = os.path.dirname(self.root_folder)
+
+        # 파일 리스트 초기화
+        file_list = []
+
+        # parent_folder를 기준으로 모든 파일을 탐색
+        for root, _, files in os.walk(self.root_folder):
+            # 파일을 자연 정렬하여 순회
+            for file in natsorted(files):
+                file_path = os.path.join(root, file)  # 파일 경로 생성
+
+                # 파일의 부모 폴더명 가져오기
+                relative_path = os.path.relpath(file_path, grandparent_folder)
+                path_components = relative_path.split(os.sep)
+                if (len(path_components) > 2):
+                    two_depth_path = os.path.join(
+                        path_components[0], path_components[1])
+                else:
+                    two_depth_path = None
+                relative_except_filename_path = os.path.dirname(relative_path)
+                first_folder_name = relative_path.split(
+                    os.sep)[1]  # 첫 번째 서브폴더명 가져오기
+
+                # 파일 정보를 딕셔너리로 추가
+                file_list.append({
+                    '위원회': top_level_folder,
+                    '피감기관': first_folder_name,
+                    'FILE_NAME': file,  # 파일명
+                    '실제 경로': relative_path,  # 실제 경로
+                    '파일명 제외 경로': relative_except_filename_path,  # 파일명 제외 경로이름
+                    '2단계 서브 폴더': two_depth_path,
+                    '전체 경로': file_path
+                })
+
+        # DataFrame 생성
+        return pd.DataFrame(file_list)
+
+    def processing_search_in_row(self, row):
+        depth2_result = 4
+
+        primary_search_in_row = self.primary_search_in_row(row['전체 경로'])
+        if primary_search_in_row == 4:
+            if row['2단계 서브 폴더'] is not None:
+                depth2_result = self.search_in_row(row['2단계 서브 폴더'])
+                path_result = self.search_in_row(row['파일명 제외 경로'])
+            else:
+                path_result = self.search_in_row(row['파일명 제외 경로'])
+            if depth2_result == 4:
+                if path_result == 4:
+                    result_filetype = self.search_in_row(row['실제 경로'])
+                else:
+                    result_filetype = path_result
+            else:
+                result_filetype = depth2_result
+        else:
+            result_filetype = primary_search_in_row
+        return result_filetype
 
     def primary_search_in_row(self, row):
         dir_attach_pattern = '|'.join(
