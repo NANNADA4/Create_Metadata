@@ -10,7 +10,6 @@ from openpyxl.styles import PatternFill
 from natsort import natsorted
 import pandas as pd
 import shutil
-import logging
 
 
 class FileListGenerator(QWidget):
