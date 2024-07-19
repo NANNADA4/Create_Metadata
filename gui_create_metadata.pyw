@@ -23,40 +23,12 @@ class FileListGenerator(QWidget):
         self.names_21 = ['강기윤', '강대식', '강득구', '강민국', '강민정', '강병원', '강선우', '강성희', '강은미', '강준현', '강훈식', '고민정', '고영인', '고용진', '곽상도', '구자근', '권명호', '권성동', '권영세', '권은희', '권인숙', '권칠승', '기동민', '김경만', '김경협', '김교흥', '김근태', '김기현', '김남국', '김도읍', '김두관', '김미애', '김민기', '김민석', '김민철', '김병기', '김병욱', '김병욱', '김병주', '김상훈', '김상희', '김석기', '김선교', '김성원', '김성주', '김성환', '김수흥', '김승남', '김승수', '김승원', '김영배', '김영선', '김영식', '김영주', '김영진', '김영호', '김예지', '김용민', '김용판', '김웅', '김원이', '김윤덕', '김은혜', '김은희', '김의겸', '김정재', '김정호', '김종민', '김주영', '김진애', '김진표', '김철민', '김태년', '김태호', '김태흠', '김학용', '김한규', '김한정', '김형동', '김홍걸', '김회재', '김희곤', '김희국', '남인순', '노용호', '노웅래', '도종환', '류성걸', '류호정', '맹성규', '문정복', '문진석', '민병덕', '민형배', '민홍철', '박광온', '박대수', '박대출', '박덕흠', '박범계', '박병석', '박상혁', '박성민', '박성준', '박성중', '박수영', '박영순', '박완수', '박완주', '박용진', '박재호', '박정', '박정하', '박주민', '박진', '박찬대', '박형수', '박홍근', '배준영', '배진교', '배현진', '백종헌', '백혜련', '변재일', '서동용', '서범수', '서병수', '서삼석', '서영교', '서영석', '서일준', '서정숙', '설훈', '성일종', '소병철', '소병훈', '송갑석', '송기헌', '송석준', '송언석', '송영길', '송옥주', '송재호', '신동근', '신영대', '신원식', '신정훈', '신현영', '심상정', '안규백', '안민석', '안병길', '안철수', '안호영', '양경규', '양경숙', '양금희', '양기대', '양이원영', '양정숙',
                          '양향자', '어기구', '엄태영', '오기형', '오영환', '오영훈', '용혜인', '우상호', '우신구', '우원식', '위성곤', '유경준', '유기홍', '유동수', '유상범', '유의동', '유정주', '윤건영', '윤관석', '윤두현', '윤미향', '윤상현', '윤영덕', '윤영석', '윤영찬', '윤재갑', '윤재옥', '윤주경', '윤준병', '윤창현', '윤한홍', '윤호중', '윤후덕', '윤희숙', '이개호', '이광재', '이규민', '이낙연', '이달곤', '이동주', '이만희', '이명수', '이병훈', '이상민', '이상직', '이상헌', '이성만', '이소영', '이수진', '이수진', '이양수', '이영', '이용', '이용빈', '이용선', '이용우', '이용호', '이원욱', '이원택', '이은주', '이인선', '이인영', '이자스민', '이장섭', '이재명', '이재정', '이정문', '이종배', '이종성', '이주환', '이채익', '이철규', '이탄희', '이태규', '이학영', '이해식', '이헌승', '이형석', '인재근', '임병헌', '임오경', '임이자', '임종성', '임호선', '장경태', '장동혁', '장제원', '장철민', '장혜영', '전봉민', '전용기', '전재수', '전주혜', '전해철', '전혜숙', '정경희', '정동만', '정성호', '정우택', '정운천', '정일영', '정점식', '정정순', '정진석', '정찬민', '정청래', '정춘숙', '정태호', '정필모', '정희용', '조경태', '조명희', '조수진', '조승래', '조오섭', '조은희', '조응천', '조정식', '조정훈', '조태용', '조해진', '주철현', '주호영', '지성호', '진선미', '진성준', '천준호', '최강욱', '최기상', '최승재', '최연숙', '최영희', '최인호', '최재형', '최종윤', '최춘식', '최형두', '최혜영', '추경호', '태영호', '하영제', '하태경', '한기호', '한무경', '한병도', '한정애', '한준호', '허숙정', '허영', '허은아', '허종식', '홍기원', '홍문표', '홍석준', '홍성국', '홍영표', '홍익표', '홍정민', '홍준표', '황보승희', '황운하', '황희']
         self.file_attach = ['붙임', '별도', '별첨', '별도제출', '별도 제출']
-        self.file_answer = ['답변서', '답변자료', '질의 답변', '질의답변']
+        self.file_answer = ['답변서', '답변자료', '질의 답변', '질의답변', '요구답변']
         self.file_require = ['공통요구', '요구자료', '자료요구', '위원 요구', '감사 요구', '감사요구']
-
-    def select_root_folder(self):
-        self.root_folder = QFileDialog.getExistingDirectory(self, '폴더를 선택하세요')
-        if self.root_folder:
-            self.label_selected_root_folder.setText(
-                f'선택한 폴더: {self.root_folder}')
-        else:
-            self.label_selected_root_folder.setText('선택한 폴더: 선택하지 않음')
-
-        if self.root_folder and self.output_file:
-            self.generate_button.setEnabled(True)
-
-    def select_output_dir(self):
-        file_dialog = QFileDialog()
-        file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
-        file_dialog.setNameFilter("Excel 파일 (*.xlsx)")
-        file_dialog.setViewMode(QFileDialog.ViewMode.Detail)
-
-        if file_dialog.exec():
-            selected_files = file_dialog.selectedFiles()
-            self.output_file = selected_files[0]
-            self.label_selected_output_dir.setText(
-                f'선택한 파일: {self.output_file}')
-        else:
-            self.label_selected_output_dir.setText('선택한 파일: 선택하지 않음')
-
-        if self.root_folder and self.output_file:
-            self.generate_button.setEnabled(True)
 
     def init_ui(self):
         self.setWindowTitle('국정감사 메타데이터 생성기')
-        self.resize(300, 200)
+        self.resize(400, 300)
 
         layout = QVBoxLayout()
 
@@ -81,32 +53,73 @@ class FileListGenerator(QWidget):
         self.separator.setFrameShadow(QFrame.Shadow.Sunken)
         layout.addWidget(self.separator)
 
-        self.generate_button = QPushButton('엑셀 생성')
-        self.generate_button.clicked.connect(self.generate_metadata)
-        self.generate_button.setDefault(True)
-        self.generate_button.setEnabled(False)
-        layout.addWidget(self.generate_button)
-
-        self.separator2 = QFrame()
-        self.separator2.setFrameShape(QFrame.Shape.HLine)
-        self.separator2.setFrameShadow(QFrame.Shadow.Sunken)
-        layout.addWidget(self.separator2)
+        self.generate_metadata_button = QPushButton('엑셀 생성')
+        self.generate_metadata_button.clicked.connect(self.generate_metadata)
+        self.generate_metadata_button.setDefault(True)
+        self.generate_metadata_button.setEnabled(False)
+        layout.addWidget(self.generate_metadata_button)
 
         self.move_file_button = QPushButton('파일 분류 및 이동')
-        # self.
+        self.move_file_button.clicked.connect(self.move_file)
+        self.move_file_button.setEnabled(False)
+        layout.addWidget(self.move_file_button)
 
         self.setLayout(layout)
 
-    def generate_metadata(self):
+    def select_root_folder(self):
+        self.root_folder = QFileDialog.getExistingDirectory(self, '폴더를 선택하세요')
+        if self.root_folder:
+            self.label_selected_root_folder.setText(
+                f'선택한 폴더: {self.root_folder}')
+        else:
+            self.label_selected_root_folder.setText('선택한 폴더: 선택하지 않음')
+
+        if self.root_folder and self.output_file:
+            self.generate_metadata_button.setEnabled(True)
+            self.move_file_button.setEnabled(True)
+
+    def select_output_dir(self):
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+        file_dialog.setNameFilter("Excel 파일 (*.xlsx)")
+        file_dialog.setViewMode(QFileDialog.ViewMode.Detail)
+
+        if file_dialog.exec():
+            selected_files = file_dialog.selectedFiles()
+            self.output_file = selected_files[0]
+            self.label_selected_output_dir.setText(
+                f'선택한 파일: {self.output_file}')
+        else:
+            self.label_selected_output_dir.setText('선택한 파일: 선택하지 않음')
+
+        if self.root_folder and self.output_file:
+            self.generate_metadata_button.setEnabled(True)
+            self.move_file_button.setEnabled(True)
+
+    def check_folder_excel(self):
         if not os.path.isdir(self.root_folder):
             QMessageBox.warning(self, '경로 오류', '유효하지 않은 폴더 경로입니다.')
             return
+        add_extension_filename = self.output_file + '.xlsx'
+
+        if not os.path.exists(self.output_file) and not os.path.exists(add_extension_filename):
+            return False
+
+    def move_file(self):
+        self.generate_metadata_button.setEnabled(False)
+
+        self.check_folder_excel()
+
+    def generate_metadata(self):
+        self.move_file_button.setEnabled(False)
+
+        is_excel_exist = self.check_folder_excel()
 
         df = self.dir_to_dic()
         # 출력 파일이 존재하지 않는 경우 새로운 워크북 생성
         add_extension_filename = self.output_file + '.xlsx'
 
-        if not os.path.exists(self.output_file) and not os.path.exists(add_extension_filename):
+        if is_excel_exist is False:
             if not self.output_file.endswith('.xlsx'):
                 self.output_file = add_extension_filename
             wb = Workbook()
@@ -230,12 +243,15 @@ class FileListGenerator(QWidget):
             ws.cell(row=last_row + index + 1, column=10,
                     value=row['실제 경로'])  # 실제 경로
 
-            if row['2단계 서브 폴더']:
-                result_dir = self.search_in_row(row['2단계 서브 폴더'])
-                if result_dir == 4:
-                    result_dir = self.search_in_row(row['파일명 제외 경로'])
+            depth2_result = self.search_in_row(row['2단계 서브 폴더'])
+            path_result = self.search_in_row(row['파일명 제외 경로'])
+            if depth2_result == 4:
+                if path_result == 4:
+                    result_dir = self.search_in_row(row['실제 경로'])
+                else:
+                    result_dir = path_result
             else:
-                result_dir = self.search_in_row(row['파일명 제외 경로'])
+                result_dir = depth2_result
 
             if result_dir == 1:
                 ws.cell(row=last_row + index + 1,
@@ -276,6 +292,8 @@ class FileListGenerator(QWidget):
 
         result_max = max(max(len_attach, len_answer), len_require)
 
+        if result_max == 0:
+            return 4
         if len_attach == result_max:
             return 1
         if len_answer == result_max:
