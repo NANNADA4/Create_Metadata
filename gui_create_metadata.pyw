@@ -163,31 +163,34 @@ class FileListGenerator(QWidget):
 
             try:
                 if result_filetype == 1:
-                    output_dir = os.path.join(
-                        self.output_folder, com_dirname, org_dirname, '별도제출자료')
-                    os.makedirs(output_dir, exist_ok=True)
-                    shutil.copy2(file_dirname, output_dir)
+                    self.copy_and_generate_folder(
+                        com_dirname, org_dirname, file_dirname, '별도제출자료')
                 elif result_filetype == 2:
-                    output_dir = os.path.join(
-                        self.output_folder, com_dirname, org_dirname, '서면질의답변자료')
-                    os.makedirs(output_dir, exist_ok=True)
-                    shutil.copy2(file_dirname, output_dir)
+                    self.copy_and_generate_folder(
+                        com_dirname, org_dirname, file_dirname, '서면질의답변자료')
                 elif result_filetype == 3:
-                    output_dir = os.path.join(
-                        self.output_folder, com_dirname, org_dirname, '국정감사요구자료')
-                    os.makedirs(output_dir, exist_ok=True)
-                    shutil.copy2(file_dirname, output_dir)
+                    self.copy_and_generate_folder(
+                        com_dirname, org_dirname, file_dirname, '국정감사요구자료')
                 else:
-                    output_dir = os.path.join(
-                        self.output_folder, com_dirname, org_dirname, '기타')
-                    os.makedirs(output_dir, exist_ok=True)
-                    shutil.copy2(file_dirname, output_dir)
+                    self.copy_and_generate_folder(
+                        com_dirname, org_dirname, file_dirname, '기타')
             except FileNotFoundError as e:
                 error_message = str(e) + ' ' + file_dirname
                 with open(self.output_folder + '/log.txt', 'a') as file:
                     file.write(error_message + '\n')
 
         QMessageBox.information(self, '완료', f'{self.output_folder}에 저장되었습니다.')
+
+    def copy_and_generate_folder(self, com_dirname, org_dirname, file_dirname, folder_name):
+        try:
+            output_dir = os.path.join(
+                self.output_folder, com_dirname, org_dirname, folder_name)
+            os.makedirs(output_dir, exist_ok=True)
+            shutil.copy2(file_dirname, output_dir)
+        except FileNotFoundError as e:
+            error_message = str(e) + ' ' + file_dirname
+            with open(self.output_folder + '/log.txt', 'a') as file:
+                file.write(error_message + '\n')
 
     def generate_metadata(self):
         is_excel_exist = self.check_folder_excel()
