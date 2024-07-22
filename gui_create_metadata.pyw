@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import shutil
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout,
     QLabel, QPushButton, QMessageBox, QFileDialog, QFrame, QCheckBox
@@ -9,11 +10,27 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill
 from natsort import natsorted
 import pandas as pd
-import shutil
 
 
 class FileListGenerator(QWidget):
+    """
+    국정감사 메타데이터 생성기 클래스.
+
+    Attributes:
+        root_folder (str): 사용자가 선택한 폴더 경로.
+        output_excel (str): 생성할 엑셀 파일 경로.
+        output_folder (str): 파일을 이동할 폴더 경로.
+        organizations (list): 조직명을 저장하는 리스트.
+        names_21 (list): 21대 국회의원 이름을 저장하는 리스트.
+        file_attach (list): 첨부파일 관련 키워드 리스트.
+        file_answer (list): 답변서 관련 키워드 리스트.
+        file_require (list): 요구자료 관련 키워드 리스트.
+    """
+
     def __init__(self):
+        """
+        초기화 함수. UI를 초기화하고 필요한 변수들을 초기화합니다.
+        """
         super().__init__()
         self.init_ui()
         self.root_folder = ''
@@ -29,6 +46,9 @@ class FileListGenerator(QWidget):
         self.file_require = ['공통요구', '요구자료', '자료요구', '위원 요구', '감사 요구', '감사요구']
 
     def init_ui(self):
+        """
+        UI 초기화 함수. PyQt6를 사용하여 GUI를 설정합니다.
+        """
         self.setWindowTitle('국정감사 메타데이터 생성기')
         self.resize(400, 300)
 
@@ -84,6 +104,13 @@ class FileListGenerator(QWidget):
         self.setLayout(layout)
 
     def checkbox_changed(self, state):
+        """
+        체크박스 상태 변경 이벤트 핸들러 함수.
+        체크박스 상태에 따라 UI 상태를 변경합니다.
+
+        Args:
+            state (int): 체크박스의 현재 상태 (Qt.CheckState).
+        """
         if state == self.checkbox_move_file.isChecked():
             self.output_path_input.setEnabled(False)
             self.output_path_input2.setEnabled(True)
@@ -92,12 +119,20 @@ class FileListGenerator(QWidget):
             self.output_path_input2.setEnabled(False)
 
     def start_processing(self):
+        """
+        작업 시작 버튼 클릭 이벤트 핸들러 함수.
+        체크박스 상태에 따라 메타데이터 생성 또는 파일 이동 작업을 수행합니다.
+        """
         if self.checkbox_move_file.isChecked():
             self.generate_metadata()
         else:
             self.move_file()
 
     def select_root_folder(self):
+        """
+        폴더 선택 버튼 클릭 이벤트 핸들러 함수.
+        사용자가 폴더를 선택하면 선택한 폴더 경로를 저장하고 UI에 표시합니다.
+        """
         self.root_folder = QFileDialog.getExistingDirectory(self, '폴더를 선택하세요')
         if self.root_folder:
             self.label_selected_root_folder.setText(
@@ -109,6 +144,10 @@ class FileListGenerator(QWidget):
             self.processing_start_button.setEnabled(True)
 
     def select_output_folder(self):
+        """
+        폴더 이동 - 폴더 선택 버튼 클릭 이벤트 핸들러 함수.
+        사용자가 폴더를 선택하면 선택한 폴더 경로를 저장하고 UI에 표시합니다.
+        """
         self.output_folder = QFileDialog.getExistingDirectory(
             self, '폴더를 선택하세요')
         if self.output_folder:
@@ -122,6 +161,10 @@ class FileListGenerator(QWidget):
             self.processing_start_button.setEnabled(True)
 
     def select_output_excel(self):
+        """
+        메타데이터 생성 - 파일 선택 버튼 클릭 이벤트 핸들러 함수.
+        사용자가 엑셀 파일을 선택하면 선택한 파일 경로를 저장하고 UI에 표시합니다.
+        """
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
         file_dialog.setNameFilter("Excel 파일 (*.xlsx)")
@@ -139,6 +182,10 @@ class FileListGenerator(QWidget):
             self.processing_start_button.setEnabled(True)
 
     def move_file(self):
+        """
+        파일 이동 작업을 수행하는 함수.
+        선택한 폴더 내의 파일을 분류하여 다른 폴더로 이동시킵니다.
+        """
         df = self.dir_to_dic()
 
         for _, row in df.iterrows():
@@ -176,7 +223,7 @@ class FileListGenerator(QWidget):
                         com_dirname, org_dirname, file_dirname, '기타')
             except FileNotFoundError as e:
                 error_message = str(e) + ' ' + file_dirname
-                with open(self.output_folder + '/log.txt', 'a') as file:
+                with open(self.output_folder + '/log.txt', 'a', encoding='utf-8') as file:
                     file.write(error_message + '\n')
 
         QMessageBox.information(self, '완료', f'{self.output_folder}에 저장되었습니다.')
@@ -351,19 +398,24 @@ class FileListGenerator(QWidget):
         depth2_result = 4
 
         primary_search_in_row = self.primary_search_in_row(row['전체 경로'])
+        secondary_search_in_row = self.secondary_search_in_row(
+            row['FILE_NAME'])
         if primary_search_in_row == 4:
-            if row['2단계 서브 폴더'] is not None:
-                depth2_result = self.search_in_row(row['2단계 서브 폴더'])
-                path_result = self.search_in_row(row['파일명 제외 경로'])
-            else:
-                path_result = self.search_in_row(row['파일명 제외 경로'])
-            if depth2_result == 4:
-                if path_result == 4:
-                    result_filetype = self.search_in_row(row['실제 경로'])
+            if secondary_search_in_row == 4:
+                if row['2단계 서브 폴더'] is not None:
+                    depth2_result = self.search_in_row(row['2단계 서브 폴더'])
+                    path_result = self.search_in_row(row['파일명 제외 경로'])
                 else:
-                    result_filetype = path_result
+                    path_result = self.search_in_row(row['파일명 제외 경로'])
+                if depth2_result == 4:
+                    if path_result == 4:
+                        result_filetype = self.search_in_row(row['실제 경로'])
+                    else:
+                        result_filetype = path_result
+                else:
+                    result_filetype = depth2_result
             else:
-                result_filetype = depth2_result
+                result_filetype = secondary_search_in_row
         else:
             result_filetype = primary_search_in_row
         return result_filetype
@@ -384,6 +436,14 @@ class FileListGenerator(QWidget):
         dir_attach_matches = re.search(dir_require_pattern, row)
         if dir_attach_matches:
             return 3
+        return 4
+
+    def secondary_search_in_row(self, row):
+        secondary_attach_pattern = '|'.join(
+            rf'\[\({re.escape(org)}\)' for org in self.file_attach)
+        secondary_attach_match = re.search(secondary_attach_pattern, row)
+        if secondary_attach_match:
+            return 1
         return 4
 
     def search_in_row(self, row):
@@ -411,7 +471,7 @@ class FileListGenerator(QWidget):
         else:
             len_require = len(matches_require.group(0))
 
-        result_max = max(max(len_attach, len_answer), len_require)
+        result_max = max(len_attach, len_answer, len_require)
 
         if result_max == 0:
             return 4
