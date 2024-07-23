@@ -205,23 +205,12 @@ class FileListGenerator(QWidget):
             else:
                 org_dirname = row['피감기관']
 
-            file_dirname = row['전체 경로']
-
-            result_filetype = self.processing_search_in_row(row)
-
-            if result_filetype == 1:
-                self.copy_and_generate_folder(
-                    com_dirname, org_dirname, file_dirname, '별도제출자료')
-            elif result_filetype == 2:
-                self.copy_and_generate_folder(
-                    com_dirname, org_dirname, file_dirname, '서면질의답변자료')
-            elif result_filetype == 3:
-                self.copy_and_generate_folder(
-                    com_dirname, org_dirname, file_dirname, '국정감사요구자료')
-            else:
-                self.copy_and_generate_folder(
-                    com_dirname, org_dirname, file_dirname, '기타')
-
+            os.makedirs(os.path.join(self.output_folder, com_dirname,
+                                     org_dirname, '서면답변자료'))
+            os.makedirs(os.path.join(self.output_folder, com_dirname,
+                                     org_dirname, '위원회 요구자료'))
+            os.makedirs(os.path.join(self.output_folder, com_dirname,
+                                     org_dirname, '위원회 요구자료 - 답변'))
         QMessageBox.information(self, '완료', f'{self.output_folder}에 저장되었습니다.')
 
     def copy_and_generate_folder(self, com_dirname, org_dirname, file_dirname, folder_name):
