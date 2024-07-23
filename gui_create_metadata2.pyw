@@ -43,6 +43,8 @@ class FileListGenerator(QWidget):
         self.file_attach = ['asdfasdfasdfasdfasfdg']
         self.file_answer = ['서면답변자료']
         self.file_require = ['위원회 요구자료']
+        self.file_require_answer = ['##고민정위원', '##박성중위원', '##이인영위원', '##조승래위원', '##하영제위원', '과방위행정실', '답변', '작성자료', '完', '[연구개발특구진흥재단] 박성중 위원님_공통요구자료', '제출', '과학기술정보방송통신위원회(박성중 의원실, 제410회 국정감사 공통요구자료)_과학기술인공제회', '과학기술정보방송통신위원회(이인영 의원실, 제410회 국정감사 기본 요구자료)_과학기술인공제회', '과학기술정보방송통신위원회(하영제 의원실, 제410회 국정감사 서류(자료)제출요구)',
+                                    '[연구개발특구진흥재단] 이인영 위원님_국정감사 기본 요구자료', '[연구개발특구진흥재단] 하영제 위원님_과방위 국정감사 자료 요구', '(제출)', '230920 이인영 의원실 과방위 공통 요구 자료', '230920 박성중 의원실 과방위 공통요구 자료', '230920 하영제 의원실 과방위 공통요구 자료', '(230920)_(과방위, 이인영 의원실) 국정감사 기본 요구자료_한국항공우주연구원', '(230920)_(과방위, 박성중 의원실) 공통요구자료_한국항공우주연구원', '(230920)_(과방위, 하영제 의원실) 국정감사 서류(자료)제출요구_한국항공우주연구원', '광주과학기술원', '(양식1) (이인영 의원실) 2023년 과방위 국정감사 기본자료', '(양식1) (박성중 의원실) 2023년 과방위 국정감사 기본자료', '(양식1) (하영제 의원실) 2023년 과방위 국정감사 기본자료']
 
     def init_ui(self):
         """
@@ -258,7 +260,7 @@ class FileListGenerator(QWidget):
             # 첫 번째 행의 셀 색상 설정
             fill_color = PatternFill(start_color='4f81bd',
                                      end_color='4f81bd', fill_type='solid')
-            for col in range(1, 12):
+            for col in range(1, 9):
                 ws.cell(row=1, column=col).fill = fill_color
         else:
             # 기존 파일 불러오기
@@ -346,8 +348,17 @@ class FileListGenerator(QWidget):
                 ws.cell(row=last_row + index + 1,
                         column=6, value='서면 질의 답변자료')
             elif result_filetype == 3:
-                ws.cell(row=last_row + index + 1,
-                        column=6, value='국정감사 요구자료')
+                # 지우고  self.file_require_answer 사용
+                pattern_require_answer = '|'.join(
+                    rf'{re.escape(org)}' for org in self.file_require_answer)
+                match_require_answer = re.search(
+                    pattern_require_answer, row['FILE_NAME'])
+                if match_require_answer:
+                    ws.cell(row=last_row + index + 1,
+                            column=6, value='국정감사 요구자료 - 답변')
+                else:
+                    ws.cell(row=last_row + index + 1,
+                            column=6, value='국정감사 요구자료')
             else:
                 ws.cell(row=last_row + index + 1, column=6, value='기타')
 
