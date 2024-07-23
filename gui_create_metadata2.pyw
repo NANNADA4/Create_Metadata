@@ -68,7 +68,7 @@ class FileListGenerator(QWidget):
         self.separator2.setFrameShadow(QFrame.Shadow.Sunken)
         layout.addWidget(self.separator2)
 
-        self.checkbox_move_file = QCheckBox('체크시 메타데이터 생성, 체크해제시 파일이동')
+        self.checkbox_move_file = QCheckBox('체크시 메타데이터 생성, 체크해제시 초기폴더생성')
         self.checkbox_move_file.stateChanged.connect(self.checkbox_changed)
         self.checkbox_move_file.setChecked(False)
         layout.addWidget(self.checkbox_move_file)
@@ -83,7 +83,7 @@ class FileListGenerator(QWidget):
         layout.addWidget(self.label_selected_output_dir)
 
         self.output_path_label2 = QLabel('저장할 폴더 경로:')
-        self.output_path_input2 = QPushButton('폴더 이동 - 폴더 선택')
+        self.output_path_input2 = QPushButton('초기 폴더 생성 - 폴더 선택')
         self.output_path_input2.setEnabled(True)
         self.output_path_input2.clicked.connect(self.select_output_folder)
         self.label_selected_output_dir2 = QLabel('선택한 경로: 선택하지 않음')
@@ -206,11 +206,11 @@ class FileListGenerator(QWidget):
                 org_dirname = row['피감기관']
 
             os.makedirs(os.path.join(self.output_folder, com_dirname,
-                                     org_dirname, '서면답변자료'))
+                                     org_dirname, '서면답변자료'), exist_ok=True)
             os.makedirs(os.path.join(self.output_folder, com_dirname,
-                                     org_dirname, '위원회 요구자료'))
+                                     org_dirname, '위원회 요구자료'), exist_ok=True)
             os.makedirs(os.path.join(self.output_folder, com_dirname,
-                                     org_dirname, '위원회 요구자료 - 답변'))
+                                     org_dirname, '위원회 요구자료 - 답변'), exist_ok=True)
         QMessageBox.information(self, '완료', f'{self.output_folder}에 저장되었습니다.')
 
     def copy_and_generate_folder(self, com_dirname, org_dirname, file_dirname, folder_name):
@@ -329,27 +329,8 @@ class FileListGenerator(QWidget):
                     value=row['실제 경로'])  # 실제 경로
 
             result_filetype = self.processing_search_in_row(row)
-
-            if result_filetype == 1:
-                ws.cell(row=last_row + index + 1,
-                        column=6, value='별도제출자료')
-            elif result_filetype == 2:
-                ws.cell(row=last_row + index + 1,
-                        column=6, value='서면 질의 답변자료')
-            elif result_filetype == 3:
-                # 지우고  self.file_require_answer 사용
-                pattern_require_answer = '|'.join(
-                    rf'{re.escape(org)}' for org in self.file_require_answer)
-                match_require_answer = re.search(
-                    pattern_require_answer, row['FILE_NAME'])
-                if match_require_answer:
-                    ws.cell(row=last_row + index + 1,
-                            column=6, value='국정감사 요구자료 - 답변')
-                else:
-                    ws.cell(row=last_row + index + 1,
-                            column=6, value='국정감사 요구자료')
-            else:
-                ws.cell(row=last_row + index + 1, column=6, value='기타')
+            ws.cell(row=last_row + index + 1,
+                    column=6, value=result_filetype)
 
     def dir_to_dic(self):
         # 최상위 폴더명 가져오기
@@ -396,22 +377,11 @@ class FileListGenerator(QWidget):
         return primary_search_in_row
 
     def primary_search_in_row(self, row):
-        dir_attach_pattern = '|'.join(
-            rf'\\({re.escape(org)})\\' for org in self.file_attach)
-        dir_attach_matches = re.search(dir_attach_pattern, row)
-        if dir_attach_matches:
-            return 1
-        dir_answer_pattern = '|'.join(
-            rf'\\({re.escape(org)})\\' for org in self.file_answer)
-        dir_attach_matches = re.search(dir_answer_pattern, row)
-        if dir_attach_matches:
-            return 2
-        dir_require_pattern = '|'.join(
-            rf'\\({re.escape(org)})\\' for org in self.file_require)
-        dir_attach_matches = re.search(dir_require_pattern, row)
-        if dir_attach_matches:
-            return 3
-        return 4
+        current_file_path = os.path.abspath(__file__)
+        current_dir = os.path.dirname(current_file_path)
+        last_folder_name = os.path.basename(current_dir)
+
+        return last_folder_name
 
 
 if __name__ == '__main__':
