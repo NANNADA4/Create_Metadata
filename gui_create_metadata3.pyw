@@ -11,6 +11,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill
 from natsort import natsorted
 import pandas as pd
+import chardet
 import zipfile
 
 
@@ -386,11 +387,34 @@ class FileListGenerator(QWidget):
         try:
             tmp_idx_zip = -1
             with zipfile.ZipFile(row['전체 경로'], 'r') as zip_ref:
-                tmp_zip_file_list = zip_ref.namelist()
-                zip_file_list = [
-                    name.replace('/', '\\') for name in tmp_zip_file_list if not name.endswith('/')]
+                tmp_zip_file_list = zip_ref.filelist
+                zip_file_list = []
+
+                for info in tmp_zip_file_list:
+                    filename = info.filename
+                    # 인코딩 처리
+                    if info.flag_bits & 0x800 == 0:
+                        # Byte로 변환 후 인코딩 감지
+                        try:
+                            filename_bytes = filename.encode('cp949')
+                        except UnicodeEncodeError:
+                            # cp949로 인코딩할 수 없으면 무시하거나 다른 방식으로 처리
+                            filename_bytes = filename.encode('cp437', 'ignore')
+                        guessed_encoding = chardet.detect(filename_bytes)[
+                            'encoding'] or 'cp949'
+                        filename = filename_bytes.decode(
+                            guessed_encoding, 'replace')
+
+                    # 경로에서 '/'를 '\\'로 변환하고, 디렉토리 제외
+                    if not filename.endswith('/'):
+                        filename = filename.replace('/', '\\')
+                        zip_file_list.append(filename)
+
+                # natsort를 사용하여 파일 목록을 자연스럽게 정렬
+                zip_file_list = natsorted(zip_file_list)
+
                 for idx, file in enumerate(zip_file_list):
-                    if os.path.basename(file) is not None or not '':
+                    if os.path.basename(file):
                         blank = str(row['위원회']).find(' ')
                         if blank != -1:
                             tmp_org = str(row['위원회'])[blank+1:]
@@ -424,8 +448,8 @@ class FileListGenerator(QWidget):
                                         value=matches2[0] + ' 위원')  # 위원
                         ws.cell(row=last_row + index + 1 + idx + tmp_idx,
                                 column=9, value=row['FILE_NAME'])
-                        ws.cell(row=last_row + index + 1 +
-                                idx + tmp_idx, column=10, value=os.path.basename(file))
+                        ws.cell(row=last_row + index + 1 + idx + tmp_idx,
+                                column=10, value=os.path.basename(file))
                         tmp_path = pathlib.Path(row['실제 경로']).with_suffix('')
                         zip_file_path = os.path.join(tmp_path, file)
                         ws.cell(row=last_row + index + 1 + idx + tmp_idx,
@@ -433,7 +457,11 @@ class FileListGenerator(QWidget):
                         tmp_idx_zip += 1
             return tmp_idx_zip
         except zipfile.BadZipFile as e:
-            ws.cell(row=last_row+index+1+tmp_idx, column=13, value='Y')
+            ws.cell(row=last_row + index + 1 + tmp_idx, column=13, value='Y')
+            ws.cell(row=last_row + index + 1 + tmp_idx, column=10,
+                    value=row['FILE_NAME'])  # 파일명
+            ws.cell(row=last_row + index + 1 + tmp_idx, column=11,
+                    value=row['실제 경로'])  # 실제 경로
             alz_egg_dst_dir = os.path.join(
                 self.tmp_zip_folder, row['파일명 제외 경로'])
             alz_egg_dst_file_dir = os.path.join(
