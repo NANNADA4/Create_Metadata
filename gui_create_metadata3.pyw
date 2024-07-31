@@ -485,6 +485,20 @@ class FileListGenerator(QWidget):
             if not os.path.exists(alz_egg_dst_dir):
                 os.makedirs(alz_egg_dst_dir)
             shutil.copy(row['전체 경로'], alz_egg_dst_file_dir)
+        except FileNotFoundError as e:
+            print(e)
+            ws.cell(row=last_row + index + 1 +
+                    tmp_idx, column=13, value='파일 찾을수 없음')
+            ws.cell(row=last_row + index + 1 + tmp_idx, column=10,
+                    value=row['FILE_NAME'])  # 파일명
+            ws.cell(row=last_row + index + 1 + tmp_idx, column=11,
+                    value=row['실제 경로'])  # 실제 경로
+            alz_egg_dst_dir = os.path.join(
+                self.tmp_zip_folder, row['파일명 제외 경로'])
+            alz_egg_dst_file_dir = os.path.join(
+                self.tmp_zip_folder, row['실제 경로'])
+            if not os.path.exists(alz_egg_dst_dir):
+                os.makedirs(alz_egg_dst_dir)
 
     def dir_to_dic(self):
         # 최상위 폴더명 가져오기
