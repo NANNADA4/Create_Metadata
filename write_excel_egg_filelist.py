@@ -3,6 +3,7 @@ import mmap
 import zlib
 import bz2
 import struct
+import openpyxl
 
 # EGG 압축 파일 관련 상수
 SIZE_EGG_HEADER = 14
@@ -257,37 +258,49 @@ class EggFile:
             return -1
 
 
-def get_all_files(egg_file, base_path):
+def get_all_files(egg_file):
     file_paths = []
 
     try:
         namelist = egg_file.namelist()
         for name in namelist:
-            # 경로를 디렉토리와 파일로 분리
-            parts = os.path.normpath(name).split(os.path.sep)
-            current_path = base_path
-            for part in parts:
-                current_path = os.path.join(current_path, part)
-                # 파일인지 디렉토리인지 확인
-                if part == parts[-1]:
-                    file_paths.append(current_path)
+            # 전체 경로를 저장
+            file_paths.append(name)
     except Exception as e:
         print(f"An error occurred: {e}")
 
     return file_paths
 
 
+def save_to_excel(file_paths, egg_filepath):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+
+    # 헤더 작성
+    sheet.append(["파일 경로", "EGG 파일"])
+
+    egg_filename = os.path.basename(egg_filepath)
+    egg_path_no_extension = egg_file_path.replace('.egg', '')
+
+    # 파일 경로와 EGG 파일명 작성 (확장자 포함)
+    for path in file_paths:
+        full_path = os.path.join(egg_path_no_extension, path)
+        sheet.append([full_path, egg_filename])
+
+    # 엑셀 파일 저장
+    excel_filename = f"{egg_filename}.xlsx"
+    workbook.save(excel_filename)
+    print(f"파일 목록이 {excel_filename}에 저장되었습니다.")
+
+
 # 사용 예시
 egg_file_path = '/Users/nannada4/Downloads/test.egg'  # EGG 파일 경로를 여기에 설정하세요
 egg_file = EggFile(egg_file_path)
 
-# EGG 파일 이름을 기반으로 시작 경로를 설정
-base_path = os.path.basename(egg_file_path).replace('.egg', '')
-
 # 모든 파일 경로를 리스트로 가져오기
-file_paths = get_all_files(egg_file, base_path)
+file_paths = get_all_files(egg_file)
 
-for path in file_paths:
-    print(path)
+# 파일 경로를 엑셀 파일로 저장 (EGG 파일명에 확장자 포함)
+save_to_excel(file_paths, os.path.basename(egg_file_path))
 
 egg_file.close()
