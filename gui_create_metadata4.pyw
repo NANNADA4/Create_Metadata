@@ -18,6 +18,8 @@ import zlib
 import bz2
 import struct
 
+from read_egg_filelist import get_all_files
+
 SIZE_EGG_HEADER = 14
 
 COMPRESS_METHOD_STORE = 0
@@ -634,7 +636,7 @@ class FileListGenerator(QWidget):
                     if not os.path.exists(alz_egg_dst_dir):
                         os.makedirs(alz_egg_dst_dir)
                     shutil.copy(row['전체 경로'], alz_egg_dst_file_dir)
-                if row['확장자'] == '.egg':
+                elif row['확장자'] == '.egg':
                     tmp_idx_eggs = self.read_egg_file(
                         ws, row, last_row, index, tmp_idx)
                     if tmp_idx_eggs is not None:
@@ -646,10 +648,25 @@ class FileListGenerator(QWidget):
                 ws.cell(row=last_row + index + 1 + tmp_idx, column=11,
                         value=row['실제 경로'])  # 실제 경로
 
+    def get_all_files(egg_file):
+        file_paths = []
+
+        try:
+            namelist = egg_file.namelist()
+            for name in namelist:
+                # 전체 경로를 저장
+                file_paths.append(name)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+        return file_paths
+
     def read_egg_file(self, ws, row, last_row, index, tmp_idx):
         try:
             tmp_idx_egg = -1
-            egg_file_list = natsorted(EggFile(row['전체 경로']))
+            egg_file = EggFile(row['전체 경로'])
+            base_path = os.path.basename(egg_file_path).replace('.egg', '')
+            egg_file_list = natsorted(get_all_files(egg_file, base_path))
             for idx, file in enumerate(egg_file_list):
                 if os.path.basename(file):
                     blank = str(row['위원회']).find(' ')
@@ -691,6 +708,7 @@ class FileListGenerator(QWidget):
                     ws.cell(row=last_row + index + 1 + idx + tmp_idx,
                             column=11, value=egg_file_path)
                     tmp_idx_egg += 1
+            egg_file.close()
             return tmp_idx_egg
         except:
             print(f"{row['전체 경로']} : egg file error!")
