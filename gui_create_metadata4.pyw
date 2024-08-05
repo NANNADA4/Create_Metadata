@@ -18,7 +18,7 @@ import zlib
 import bz2
 import struct
 
-from read_egg_filelist import get_all_files
+# from read_egg_filelist import get_all_files
 
 SIZE_EGG_HEADER = 14
 
@@ -636,82 +636,78 @@ class FileListGenerator(QWidget):
                     if not os.path.exists(alz_egg_dst_dir):
                         os.makedirs(alz_egg_dst_dir)
                     shutil.copy(row['전체 경로'], alz_egg_dst_file_dir)
-                elif row['확장자'] == '.egg':
+                    ws.cell(row=last_row + index + 1 + tmp_idx, column=10,
+                            value=row['FILE_NAME'])
+                    ws.cell(row=last_row + index + 1 + tmp_idx, column=11,
+                            value=row['실제 경로'])
+                if row['확장자'] == '.egg':
                     tmp_idx_eggs = self.read_egg_file(
                         ws, row, last_row, index, tmp_idx)
                     if tmp_idx_eggs is not None:
                         tmp_idx += tmp_idx_eggs
-                    ws.cell(row=last_row+index+1+tmp_idx,
-                            column=13, value='egg 파일')
-                ws.cell(row=last_row + index + 1 + tmp_idx, column=10,
-                        value=row['FILE_NAME'])  # 파일명
-                ws.cell(row=last_row + index + 1 + tmp_idx, column=11,
-                        value=row['실제 경로'])  # 실제 경로
 
-    def get_all_files(egg_file):
+    def get_alz_filelist(self, egg_file):
         file_paths = []
 
         try:
             namelist = egg_file.namelist()
             for name in namelist:
-                # 전체 경로를 저장
-                file_paths.append(name)
+                if not name.endswith('/'):
+                    name = name.replace('/', '\\')
+                    file_paths.append(name)
         except Exception as e:
             print(f"An error occurred: {e}")
 
         return file_paths
 
     def read_egg_file(self, ws, row, last_row, index, tmp_idx):
-        try:
-            tmp_idx_egg = -1
-            egg_file = EggFile(row['전체 경로'])
-            base_path = os.path.basename(egg_file_path).replace('.egg', '')
-            egg_file_list = natsorted(get_all_files(egg_file, base_path))
-            for idx, file in enumerate(egg_file_list):
-                if os.path.basename(file):
-                    blank = str(row['위원회']).find(' ')
-                    if blank != -1:
-                        tmp_org = str(row['위원회'])[blank+1:]
-                    else:
-                        tmp_org = row['위원회']
-                    ws.cell(row=last_row + index + 1 + tmp_idx +
-                            idx, column=1, value=tmp_org)
-                    pattern = '|'.join(
-                        rf'{re.escape(org)}' for org in self.organizations)
-                    matches = re.search(pattern, row['피감기관'])
-                    if matches:
-                        ws.cell(row=last_row + index + 1 + tmp_idx + idx, column=2,
-                                value=matches[0])  # 피감기관
-                    else:
-                        ws.cell(row=last_row + index + 1 + tmp_idx + idx, column=2,
-                                value=row['피감기관'])  # 피감기관
-                    pattern2 = '|'.join(
-                        rf'{re.escape(org)}' for org in self.names_21)
-                    matches2 = re.search(pattern2, row['실제 경로'])
-                    if matches2:
-                        if matches2[0] == '이용' and tmp_org != '문화체육관광위원회':
-                            if len(matches2.groups()) > 1 and matches2[1]:
-                                ws.cell(row=last_row + index + 1 + tmp_idx + idx, column=7,
-                                        value=matches2[-1] + ' 위원')  # 위원
-                            else:
-                                ws.cell(row=last_row + index + 1 + tmp_idx + idx,
-                                        column=7, value=None)  # 위원
-                        else:
+        tmp_idx_egg = -1
+        egg_file = EggFile(row['전체 경로'])
+        egg_file_list = natsorted(self.get_alz_filelist(egg_file))
+        for idx, file in enumerate(egg_file_list):
+            if os.path.basename(file):
+                blank = str(row['위원회']).find(' ')
+                if blank != -1:
+                    tmp_org = str(row['위원회'])[blank+1:]
+                else:
+                    tmp_org = row['위원회']
+                ws.cell(row=last_row + index + 1 + tmp_idx +
+                        idx, column=1, value=tmp_org)
+                pattern = '|'.join(
+                    rf'{re.escape(org)}' for org in self.organizations)
+                matches = re.search(pattern, row['피감기관'])
+                if matches:
+                    ws.cell(row=last_row + index + 1 + tmp_idx + idx, column=2,
+                            value=matches[0])
+                else:
+                    ws.cell(row=last_row + index + 1 + tmp_idx + idx, column=2,
+                            value=row['피감기관'])
+                pattern2 = '|'.join(
+                    rf'{re.escape(org)}' for org in self.names_21)
+                matches2 = re.search(pattern2, row['실제 경로'])
+                if matches2:
+                    if matches2[0] == '이용' and tmp_org != '문화체육관광위원회':
+                        if len(matches2.groups()) > 1 and matches2[1]:
                             ws.cell(row=last_row + index + 1 + tmp_idx + idx, column=7,
-                                    value=matches2[0] + ' 위원')  # 위원
-                    ws.cell(row=last_row + index + 1 + idx + tmp_idx,
-                            column=9, value=row['FILE_NAME'])
-                    ws.cell(row=last_row + index + 1 + idx + tmp_idx,
-                            column=10, value=os.path.basename(file))
-                    tmp_path = pathlib.Path(row['실제 경로']).with_suffix('')
-                    egg_file_path = os.path.join(tmp_path, file)
-                    ws.cell(row=last_row + index + 1 + idx + tmp_idx,
-                            column=11, value=egg_file_path)
-                    tmp_idx_egg += 1
-            egg_file.close()
-            return tmp_idx_egg
-        except:
-            print(f"{row['전체 경로']} : egg file error!")
+                                    value=matches2[-1] + ' 위원')
+                        else:
+                            ws.cell(row=last_row + index + 1 + tmp_idx + idx,
+                                    column=7, value=None)
+                    else:
+                        ws.cell(row=last_row + index + 1 + tmp_idx + idx, column=7,
+                                value=matches2[0] + ' 위원')
+                ws.cell(row=last_row + index + 1 + idx + tmp_idx,
+                        column=9, value=row['FILE_NAME'])
+                ws.cell(row=last_row + index + 1 + idx + tmp_idx,
+                        column=10, value=os.path.basename(file))
+                tmp_path = pathlib.Path(row['실제 경로']).with_suffix('')
+                egg_file_path = os.path.join(tmp_path, file)
+
+                ws.cell(row=last_row + index + 1 + idx + tmp_idx,
+                        column=11, value=egg_file_path)
+                tmp_idx_egg += 1
+        egg_file.close()
+        return tmp_idx_egg
 
     def read_zip_file(self, ws, row, last_row, index, tmp_idx):
         try:
@@ -787,19 +783,34 @@ class FileListGenerator(QWidget):
                         tmp_idx_zip += 1
             return tmp_idx_zip
         except zipfile.BadZipFile as e:
-            ws.cell(row=last_row + index + 1 +
-                    tmp_idx, column=13, value='분할압축')
-            ws.cell(row=last_row + index + 1 + tmp_idx, column=10,
-                    value=row['FILE_NAME'])  # 파일명
-            ws.cell(row=last_row + index + 1 + tmp_idx, column=11,
-                    value=row['실제 경로'])  # 실제 경로
-            alz_egg_dst_dir = os.path.join(
-                self.tmp_zip_folder, row['파일명 제외 경로'])
-            alz_egg_dst_file_dir = os.path.join(
-                self.tmp_zip_folder, row['실제 경로'])
-            if not os.path.exists(alz_egg_dst_dir):
-                os.makedirs(alz_egg_dst_dir)
-            shutil.copy(row['전체 경로'], alz_egg_dst_file_dir)
+            if os.path.exists(str(row['전체 경로']).replace('.zip', '.z01')):
+                ws.cell(row=last_row + index + 1 +
+                        tmp_idx, column=13, value='분할압축')
+                ws.cell(row=last_row + index + 1 + tmp_idx, column=10,
+                        value=row['FILE_NAME'])  # 파일명
+                ws.cell(row=last_row + index + 1 + tmp_idx, column=11,
+                        value=row['실제 경로'])  # 실제 경로
+                alz_egg_dst_dir = os.path.join(
+                    self.tmp_zip_folder, row['파일명 제외 경로'])
+                alz_egg_dst_file_dir = os.path.join(
+                    self.tmp_zip_folder, row['실제 경로'])
+                if not os.path.exists(alz_egg_dst_dir):
+                    os.makedirs(alz_egg_dst_dir)
+                shutil.copy(row['전체 경로'], alz_egg_dst_file_dir)
+            else:
+                ws.cell(row=last_row + index + 1 +
+                        tmp_idx, column=13, value='압축파일 오류')
+                ws.cell(row=last_row + index + 1 + tmp_idx, column=10,
+                        value=row['FILE_NAME'])  # 파일명
+                ws.cell(row=last_row + index + 1 + tmp_idx, column=11,
+                        value=row['실제 경로'])  # 실제 경로
+                alz_egg_dst_dir = os.path.join(
+                    self.tmp_zip_folder, row['파일명 제외 경로'])
+                alz_egg_dst_file_dir = os.path.join(
+                    self.tmp_zip_folder, row['실제 경로'])
+                if not os.path.exists(alz_egg_dst_dir):
+                    os.makedirs(alz_egg_dst_dir)
+                shutil.copy(row['전체 경로'], alz_egg_dst_file_dir)
         except UnicodeDecodeError:
             ws.cell(row=last_row + index + 1 +
                     tmp_idx, column=13, value='인코딩 에러')
