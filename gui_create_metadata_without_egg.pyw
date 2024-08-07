@@ -538,7 +538,7 @@ class FileListGenerator(QWidget):
             if not os.path.exists(alz_egg_dst_dir):
                 os.makedirs(alz_egg_dst_dir)
         except ValueError as e:
-            print(f"Value Error! : {e}")
+            print(f"Value Error! : {e} at {row['전체 경로']}")
             ws.cell(row=last_row + index + 1 +
                     tmp_idx, column=13, value='압축파일 오류')
             ws.cell(row=last_row + index + 1 + tmp_idx, column=10,
