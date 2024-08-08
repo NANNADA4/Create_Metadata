@@ -11,25 +11,26 @@ def copy_files_with_extensions(src, dst, extensions):
     :param extensions: 복사할 파일 확장자의 리스트 (예: ['.zip', '.egg'])
     """
     if not os.path.exists(dst):
-        os.makedirs(dst)  # 대상 디렉터리가 없으면 생성합니다.
+        os.makedirs(dst)
 
     for dirpath, _, filenames in os.walk(src):
-        # 현재 디렉터리에서 상대 경로를 계산합니다.
         relative_path = os.path.relpath(dirpath, src)
         target_dir = os.path.join(dst, relative_path)
 
-        # 특정 확장자를 가진 파일이 있는 경우만 폴더를 생성합니다.
         files_to_copy = [filename for filename in filenames if any(
             filename.endswith(ext) for ext in extensions)]
         if files_to_copy:
             if not os.path.exists(target_dir):
                 os.makedirs(target_dir)
 
-            # 특정 확장자를 가진 파일만 복사합니다.
             try:
                 for filename in files_to_copy:
                     src_file = os.path.join(dirpath, filename)
                     dst_file = os.path.join(target_dir, filename)
+
+                    if os.path.exists(dst_file):
+                        print(f"{dst_file} - 존재하는 파일")
+                        continue
                     shutil.copy2(src_file, dst_file)
                     print(f"{src_file} - 복사 완료")
             except Exception as e:
