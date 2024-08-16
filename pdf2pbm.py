@@ -9,13 +9,12 @@ def extract_bookmarks(pdf_path):
 
 
 def convert_to_html(bookmarks):
-    html_content = '<HTML><HEAD>\n<META NAME="PBM Ver 1.0", CONTENT="Bookmark exported by N2M">\n</HEAD>\n'
+    html_content = '<HTML><HEAD>\n<META NAME="PBM Ver 1.0", CONTENT="Bookmark exported by muhayu">\n</HEAD>\n'
 
     for item in bookmarks:
         level, title, page, _ = item
         blank = "    "*(level-1)
-        html_content += f'{blank}<Level ID="{level}", Page="{page -
-                                                             1}">{title}</Level>\n'
+        html_content += f'{blank}<Level ID="{level}", Page="{page}">{title}</Level>\n'
     html_content += '</HTML>'
     return html_content
 
